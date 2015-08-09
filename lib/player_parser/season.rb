@@ -3,7 +3,7 @@ module PlayerParser
     def initialize(data, row)
       cells = row.css('td')
 
-      data.each { |d, i| instance_variable_set(:"@#{d}", cells[i].text) }
+      data.each { |d, i| instance_variable_set(:"@_#{d}", cells[i].text) }
     end
 
     def to_hash

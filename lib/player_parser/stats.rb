@@ -7,7 +7,7 @@ module PlayerParser
     attr_reader :seasons
 
     def initialize(page, id)
-      @page = Nokogiri::HTML(page)
+      @page = page
       @id   = id
       parse_table
     end
@@ -19,7 +19,7 @@ module PlayerParser
       headers      = table.css('thead').first
       data_headers = headers.css('th').each_with_index.select { |d, _| d.has_attribute?('data-name') }
       data_headers.map! { |d, i| [d.attr('data-stat').downcase, i] }
-      seasons      = table.css('tr.full[id^="pitching_standard."]')
+      seasons      = table.css("tr.full[id^=\"#{@id}.\"]")
 
       @seasons = seasons.reduce({}) do |hash, season|
         /[^\.]*\.(?<year>.*)/ =~ season.attr('id')
