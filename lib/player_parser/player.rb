@@ -8,35 +8,30 @@ require 'player_parser/stats'
 
 module PlayerParser
   class Player
-    attr_reader :first_name, :middle_name, :last_name
+    attr_reader :first_name, :last_name
 
     def initialize(html)
-      page         = Nokogiri::HTML(html)
+      page                     = Nokogiri::HTML(html)
+      full_name                = page.css('#player_name').first.text.removeaccents
+      @first_name, @last_name  = FullNameSplitter::split(full_name)
 
-      full_name    = page.css('#player_name').first.text.removeaccents
-      first, last  = FullNameSplitter::split(full_name)
-      first        = first.split
-      @first_name  = first.shift
-      @last_name   = last
-      @middle_name = first.join(' ')
-
-      birthday     = page.css('#necro-birth').attr('data-birth').text.split('-')
+      birthday                 = page.css('#necro-birth').attr('data-birth').text.split('-')
       birthday.map!(&:to_i)
-      @birthday    = Date.civil(*birthday)
-      @age = (Date::today - @birthday).to_i / 365
+
+      @birthday = Date.civil(*birthday)
+      @age      = (Date::today - @birthday).to_i / 365
 
 
-      @schools     = page.css('a[href^="/schools/index.cgi?key_school="]').map(&:text)
-      @position    = page.css('span[itemprop="role"]').first.text.downcase
+      @schools  = page.css('a[href^="/schools/index.cgi?key_school="]').map(&:text)
+      @position = page.css('span[itemprop="role"]').first.text.downcase
 
-      ident        = @position == 'pitcher' ? 'pitching' : 'batting'
-      @stats       = PlayerParser::Stats.new(page, "#{ident}_standard")
+      ident     = @position == 'pitcher' ? 'pitching' : 'batting'
+      @stats    = PlayerParser::Stats.new(page, "#{ident}_standard")
     end
 
     def to_hash
       {
         first_name: @first_name,
-        middle_name: @middle_name,
         last_name: @last_name,
         birthday: Date._parse(@birthday.iso8601),
         age: @age,

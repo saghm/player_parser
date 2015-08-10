@@ -5,13 +5,10 @@ require "player_parser"
 
 client     = PlayerParser::Client.new
 json_file  = File::open('mlb_players.json', 'w')
-names_file = File::open('names.csv', 'w')
 
 client.each_active_player do |player|
-  puts "#{player.first_name} #{player.middle_name} #{player.last_name}"
-  names_file.puts "#{player.first_name},#{player.middle_name},#{player.last_name}"
+  puts "#{player.first_name} #{player.last_name}"
   json_file.puts player.to_json
 end
 
 json_file.close
-names_file.close
